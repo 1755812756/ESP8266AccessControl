@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>新增修改权限</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="layui/layer/layer.css" media="all">
+    <link rel="stylesheet" href="layui/laydate/laydate.css" media="all">
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <div class="layui-row" style="padding: 30px;">
+        <div class="layui-col-md12">
+            <form class="layui-form" id="dataform" lay-filter="dataform">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">卡号</label>
+                    <div class="layui-input-inline">
+                        <input type="number" name="CardNo" required lay-verify="required" placeholder="请输入卡号" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">有效期</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id='validityDate' name="ValidityDate" required lay-verify="required" placeholder="请输入有效期" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="frmSet">立即提交</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script src="jquery/jquery-3.2.1.min.js"></script>
+    <script src="layui/layui.js"></script>
+    <script src="common.js"></script>
+    <script>
+        var urldata = getRequestAll();
+        var type = getRequestData("type");
+        layui.use(['form', 'layer', 'laydate'], function() {
+            var form = layui.form,
+                layer = layui.layer;
+            var laydate = layui.laydate;
+
+
+            if (type == 'update') {
+                console.info(urldata);
+                console.info(2);
+                form.val("dataform", urldata);
+                form.render();
+            }
+
+
+            //执行一个laydate实例
+            laydate.render({
+                elem: '#validityDate', //指定元素
+                format: 'yyyy-MM-dd HH:mm:ss',
+                type: 'datetime'
+            });
+
+            // 进行登录操作
+            form.on('submit(frmSet)', function(data) {
+                data = data.field;
+
+                $.get(`/JurisdictionSave?CardNo=${data.CardNo}&ValidityDate=${data.ValidityDate}`, function(res, status) {
+                    if (res.Tag === 1) {
+                        $("input[name='CardNo']").val('');
+                        layer.msg('操作成功!', {
+                            icon: 1,
+                            time: 1500
+                        });
+                        parent.loadTable();
+                    } else {
+                        layer.msg(res.Message, {
+                            icon: 2
+                        });
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+</body>
+
+</html>

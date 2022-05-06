@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>门禁后台-登陆</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="layui/layer/layer.css" media="all">
+    <link rel="stylesheet" href="layui/laydate/laydate.css" media="all">
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <div class="layui-row" style="padding: 30px;">
+        <div class="layui-col-md12">
+            <form class="layui-form">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">开门时长</label>
+                    <div class="layui-input-inline">
+                        <input type="number" name="OpenTime" required lay-verify="required" placeholder="请输入开门时长" autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">继电器闭合时长</div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="frmSystemSetUp">立即提交</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                        <button id="OpenDoor" class="layui-btn layui-btn-primary">远程开门</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="jquery/jquery-3.2.1.min.js"></script>
+    <script src="layui/layui.js"></script>
+    <script>
+        layui.use(['form', 'layer'], function() {
+            var form = layui.form,
+                layer = layui.layer;
+
+
+            var upload = layer.load(2);
+            $.get(`/configure/System.txt`, function(res, status) {
+                res = JSON.parse(res);
+                if (res != undefined && res.OpenTime != undefined) {
+                    console.info(res.OpenTime);
+                    $("input[name='OpenTime']").val(res.OpenTime);
+                    form.render();
+                }
+                layer.close(upload);
+            });
+
+            $("#OpenDoor").click(function() {
+                var upload = layer.msg('加载中', {
+                    icon: 16,
+                    shade: 0.2,
+                    time: false
+                });
+                $.get(`/OpenDoor`, function(res, status) {
+                    if (res.Tag === 1) {
+                        layer.msg('开门成功!', {
+                            icon: 1,
+                            time: 1500
+                        });
+                    } else {
+                        layer.msg(res.Message, {
+                            icon: 2
+                        });
+                    }
+                    layer.close(upload);
+                });
+                return false;
+            });
+
+            // 进行登录操作
+            form.on('submit(frmSystemSetUp)', function(data) {
+                data = data.field;
+                $.get(`/SystemSetUp?OpenTime=${data.OpenTime}`, function(res, status) {
+                    if (res.Tag === 1) {
+                        layer.msg('设置成功!', {
+                            icon: 1,
+                            time: 1500
+                        });
+                    } else {
+                        layer.msg(res.Message, {
+                            icon: 2
+                        });
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+</body>
+
+</html>
